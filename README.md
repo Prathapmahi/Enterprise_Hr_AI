@@ -32,8 +32,7 @@ enterprise_hr_ai/
 ├── config/
 │   └── settings.py
 ├── requirements.txt
-├── docker-compose.yml
-└── run.sh
+
 ```
 
 ## Features Implemented (All 20)
@@ -95,11 +94,6 @@ python api/main.py
 open frontend/index.html
 ```
 
-### Option 3 — Docker (recommended)
-```bash
-docker-compose up --build
-# Visit http://localhost:8000
-```
 
 ## 45 Mock Employees
 Pre-loaded with realistic data covering Engineering, Data Science, HR, Finance, DevOps, Marketing, QA, Legal, Product departments.
