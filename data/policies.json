@@ -1,0 +1,106 @@
+[
+  {
+    "id": "POL-001",
+    "source": "HR_Policy_v4.2.pdf",
+    "page": 34,
+    "category": "maternity_leave",
+    "title": "Maternity Leave Policy",
+    "content": "Maternity leave policy for all branches including Chennai: Female employees are entitled to 26 weeks of paid maternity leave. Eligibility requires minimum 80 working days in the organization. A one-time medical bonus of Rs 3500 is provided. Post-return, 12 weeks of work from home is allowed. Applicable to all grades L1 through L7. Adoption leave: 12 weeks for adopting mothers."
+  },
+  {
+    "id": "POL-002",
+    "source": "Leave_Rules_2024.pdf",
+    "page": 3,
+    "category": "casual_leave",
+    "title": "Casual Leave Rules",
+    "content": "Casual Leave (CL) rules: Each employee is entitled to 12 casual leaves per year, credited monthly. Maximum carry forward is 5 days per year. Unused CL lapses on December 31st. CL cannot be encashed. Minimum notice required is 1 working day. Cannot be combined with sick leave. Maximum 3 consecutive CL days allowed without medical certificate."
+  },
+  {
+    "id": "POL-003",
+    "source": "Leave_Rules_2024.pdf",
+    "page": 5,
+    "category": "sick_leave",
+    "title": "Sick Leave Policy",
+    "content": "Sick Leave (SL): 12 days per year for all employees. Medical certificate required for more than 3 consecutive sick leave days. Can be carried forward up to 30 days maximum. Emergency sick leave can be applied retroactively within 2 working days. Sick leave during probation is limited to 6 days."
+  },
+  {
+    "id": "POL-004",
+    "source": "Leave_Rules_2024.pdf",
+    "page": 8,
+    "category": "earned_leave",
+    "title": "Earned Leave Policy",
+    "content": "Earned Leave (EL) accrual: 1.25 days per month, totaling 15 days per year. EL can be carried forward up to 45 days. Encashment allowed at the time of retirement or resignation. Minimum 3 days EL required for application. Prior approval required minimum 7 days in advance for EL."
+  },
+  {
+    "id": "POL-005",
+    "source": "Compensation_Framework.pdf",
+    "page": 12,
+    "category": "reimbursement",
+    "title": "Travel Reimbursement Policy",
+    "content": "Domestic travel reimbursement limits: L1-L2 grade: Rs 5000 per day, L3 grade: Rs 8000 per day, L4-L5 grade: Rs 12000 per day, L6+ grade: Rs 20000 per day. International travel: L3 Rs 15000/day, L4+ Rs 25000/day. Receipt submission deadline: within 30 days. Approval chain: Manager approval + Finance team validation. Cab/auto expenses: actual with receipt up to Rs 1500/day."
+  },
+  {
+    "id": "POL-006",
+    "source": "HR_Policy_v4.2.pdf",
+    "page": 8,
+    "category": "notice_period",
+    "title": "Notice Period Policy",
+    "content": "Notice period by grade: L1-L2: 30 days, L3: 60 days, L4-L5: 90 days, L6+: 120 days. Garden leave is permitted on mutual agreement. Notice period buyout: 1 month basic salary for L3, 1.5 months for L4+. Relieving letter issued within 30 days of last working day. Handing-over period included in notice period."
+  },
+  {
+    "id": "POL-007",
+    "source": "Benefits_Handbook.pdf",
+    "page": 5,
+    "category": "medical_insurance",
+    "title": "Medical Insurance Coverage",
+    "content": "Health insurance coverage: Individual: Rs 3 lakhs per year. Family floater plan covers spouse and up to 2 children: Rs 5 lakhs. Critical illness rider: Rs 10 lakhs additional. Dental coverage: Rs 15000 per year. Vision: Rs 8000 per year. Pre-existing conditions covered after 1 year. Cashless hospitalization available at 500+ network hospitals."
+  },
+  {
+    "id": "POL-008",
+    "source": "HR_Policy_v4.2.pdf",
+    "page": 15,
+    "category": "work_from_home",
+    "title": "Work From Home Policy",
+    "content": "Work from home (WFH) policy: Up to 2 days per week for L2 and above. Maximum 15 days consecutive WFH requires special approval from L5+ manager. WFH not applicable during probation period (first 6 months). Equipment allowance: Rs 15000 one-time for WFH setup. Internet reimbursement: Rs 1500 per month."
+  },
+  {
+    "id": "POL-009",
+    "source": "Compliance_SOPs.pdf",
+    "page": 4,
+    "category": "attendance",
+    "title": "Attendance and Punctuality Policy",
+    "content": "Attendance policy: Maximum 3 late arrivals per month (beyond 15 minutes). More than 3 late arrivals triggers warning. Chronic absenteeism: more than 3 unplanned absences in a quarter. Biometric attendance mandatory for office days. Grace period: 15 minutes. Half-day applicable for late arrival beyond 3 hours."
+  },
+  {
+    "id": "POL-010",
+    "source": "Compensation_Framework.pdf",
+    "page": 2,
+    "category": "salary_structure",
+    "title": "Salary and Compensation Structure",
+    "content": "Salary structure breakdown: Basic: 50% of CTC. HRA: 30% of basic (40% for metro cities). Special allowance: 15% of CTC. Other allowances: 5%. PF deduction: 12% of basic by employee, 12% matched by employer. ESI: 0.75% employee, 3.25% employer. TDS as per income tax slab. Annual increment cycle: April. Performance bonus: April payout."
+  },
+  {
+    "id": "POL-011",
+    "source": "Benefits_Handbook.pdf",
+    "page": 18,
+    "category": "paternity_leave",
+    "title": "Paternity Leave",
+    "content": "Paternity leave: 10 working days paid leave for new fathers. Must be taken within 3 months of child birth. Applicable from first year of employment. Adoptive fathers also eligible. Can be split into two separate periods of minimum 5 days each."
+  },
+  {
+    "id": "POL-012",
+    "source": "HR_Policy_v4.2.pdf",
+    "page": 22,
+    "category": "performance_review",
+    "title": "Performance Review Process",
+    "content": "Annual performance review cycle: Self-assessment in February, Manager review in March, Calibration in March-April, Results communicated April. Rating scale: 1 (Below Expectations) to 5 (Outstanding). Bell curve: Top 10% rated 5, next 20% rated 4, 60% rated 3, 10% rated 1-2. Promotions: Based on 2 consecutive ratings of 4 or above. PIP (Performance Improvement Plan) triggered for rating below 2."
+  },
+  {
+    "id": "POL-013",
+    "source": "IT_Security_Policy.pdf",
+    "page": 3,
+    "category": "data_security",
+    "title": "Data Security and RBAC",
+    "content": "Role-Based Access Control: L1-L2 employees can only view own records. L3 employees can view team-level non-salary data. L4-L5 managers can view direct reports salary bands. L6+ can view department-level compensation. HR Admin can view all employee data. Only Finance can access and run payroll. Any unauthorized access attempt is logged and escalated to CISO."
+  }
+]

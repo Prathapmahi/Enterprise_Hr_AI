@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enterprise HR AI System</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--bg2:#161b27;--bg3:#1e2538;--bg4:#252d42;
+  --border:#2e3a55;--border2:#3d4f6e;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --blue:#3b82f6;--blue2:#1d4ed8;--green:#10b981;--amber:#f59e0b;
+  --red:#ef4444;--purple:#8b5cf6;--teal:#14b8a6;--pink:#ec4899;
+  --cyan:#06b6d4;
+  --radius:8px;--radius2:12px;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:13px;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
+.logo{font-size:15px;font-weight:700;color:#fff;letter-spacing:-0.5px}
+.logo span{color:var(--blue)}
+.agent-pills{display:flex;gap:6px;margin-left:8px;flex-wrap:wrap}
+.pill{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid;cursor:pointer;transition:all .2s}
+.pill.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.pill.idle{background:transparent;border-color:var(--border2);color:var(--text2)}
+.pill.running{background:#1e3a2a;border-color:var(--green);color:var(--green);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.pill.warn{background:#2a1e10;border-color:var(--amber);color:var(--amber)}
+.topright{margin-left:auto;display:flex;gap:8px;align-items:center}
+.badge{padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;background:var(--red);color:#fff}
+.main{display:flex;flex:1;overflow:hidden}
+.sidebar{width:200px;border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;background:var(--bg2)}
+.nav-item{padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text2);display:flex;align-items:center;gap:8px;border-left:3px solid transparent;transition:all .15s}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--bg3);color:var(--blue);border-left-color:var(--blue)}
+.nav-section{padding:10px 14px 4px;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px}
+.content{flex:1;overflow-y:auto;padding:16px;background:var(--bg)}
+.panel{display:none}
+.panel.active{display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:14px}
+.card-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+.stat-big{font-size:28px;font-weight:700;color:#fff;line-height:1}
+.stat-label{font-size:11px;color:var(--text2);margin-top:4px}
+.stat-delta{font-size:11px;margin-top:3px}
+.delta-up{color:var(--green)}
+.delta-dn{color:var(--red)}
+.chat-wrap{display:flex;gap:12px;height:calc(100vh - 130px)}
+.chat-box{flex:1;display:flex;flex-direction:column;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden}
+.chat-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:80%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5}
+.msg.user{background:var(--blue2);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.msg.ai{background:var(--bg3);color:var(--text);align-self:flex-start;border-bottom-left-radius:4px;border:1px solid var(--border)}
+.msg.system{background:transparent;color:var(--text3);align-self:center;font-size:11px;border:1px solid var(--border);padding:6px 12px;border-radius:20px}
+.msg .agent-tag{font-size:10px;font-weight:700;color:var(--blue);margin-bottom:4px}
+.msg .agent-tag.green{color:var(--green)}
+.msg .agent-tag.amber{color:var(--amber)}
+.msg .agent-tag.purple{color:var(--purple)}
+.msg .agent-tag.teal{color:var(--teal)}
+.chat-input-row{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border)}
+.chat-input{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 12px;font-size:13px;outline:none}
+.chat-input:focus{border-color:var(--blue)}
+.btn{padding:8px 14px;border-radius:var(--radius);cursor:pointer;font-size:12px;font-weight:600;border:none;transition:all .15s}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:#2563eb}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.btn-ghost:hover{border-color:var(--blue);color:var(--blue)}
+.flow-steps{display:flex;flex-direction:column;gap:6px}
+.flow-step{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);transition:all .4s}
+.flow-step.done{border-color:var(--green);background:#0d2318}
+.flow-step.active{border-color:var(--blue);background:#0d1e38;animation:pulse 1s infinite}
+.flow-step.wait{opacity:.4}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--border2);flex-shrink:0}
+.step-dot.done{background:var(--green)}
+.step-dot.active{background:var(--blue)}
+.emp-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.emp-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.emp-name{font-weight:600;font-size:13px}
+.emp-role{font-size:11px;color:var(--text2)}
+.risk-bar{height:6px;border-radius:3px;background:var(--bg4);overflow:hidden;margin-top:4px}
+.risk-fill{height:100%;border-radius:3px;transition:width .6s}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;margin:1px}
+.tag-green{background:#0d2318;color:var(--green);border:1px solid #14532d}
+.tag-red{background:#1c0a0a;color:var(--red);border:1px solid #7f1d1d}
+.tag-amber{background:#1c1208;color:var(--amber);border:1px solid #78350f}
+.tag-blue{background:#0d1e38;color:var(--blue);border:1px solid #1e3a5f}
+.tag-purple{background:#160d2a;color:var(--purple);border:1px solid #4c1d95}
+.tag-gray{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.progress{height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;margin:4px 0}
+.progress-fill{height:100%;border-radius:4px;transition:width .6s}
+.table{width:100%;border-collapse:collapse}
+.table th{text-align:left;padding:8px 10px;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border)}
+.table td{padding:8px 10px;font-size:12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.table tr:hover td{background:var(--bg3)}
+.ai-panel{width:240px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;flex-shrink:0}
+.ai-header{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot.green{background:var(--green);box-shadow:0 0 6px var(--green)}
+.dot.amber{background:var(--amber)}
+.dot.red{background:var(--red)}
+.agent-list{padding:10px}
+.agent-item{padding:8px;border-radius:8px;margin-bottom:6px;border:1px solid var(--border);background:var(--bg3)}
+.agent-name{font-size:11px;font-weight:700;color:var(--text)}
+.agent-status{font-size:10px;color:var(--text3);margin-top:2px}
+.agent-active{border-color:var(--blue);background:#0d1e38}
+.agent-active .agent-name{color:var(--blue)}
+.chart-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.chart-label{font-size:11px;color:var(--text2);width:80px;flex-shrink:0}
+.chart-bar{flex:1;height:16px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.chart-fill{height:100%;border-radius:3px}
+.chart-val{font-size:11px;color:var(--text2);width:36px;text-align:right;flex-shrink:0}
+.section-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:4px}
+.section-sub{font-size:12px;color:var(--text2);margin-bottom:16px}
+.input-field{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 12px;font-size:12px;outline:none;width:100%}
+.input-field:focus{border-color:var(--blue)}
+select.input-field option{background:var(--bg3)}
+.alert{padding:10px 14px;border-radius:8px;margin-bottom:8px;display:flex;align-items:flex-start;gap:8px;font-size:12px}
+.alert-red{background:#1c0a0a;border:1px solid #7f1d1d;color:#fca5a5}
+.alert-amber{background:#1c1208;border:1px solid #78350f;color:#fcd34d}
+.alert-green{background:#0d2318;border:1px solid #14532d;color:#6ee7b7}
+.alert-blue{background:#0d1e38;border:1px solid #1e3a5f;color:#93c5fd}
+.voice-btn{width:48px;height:48px;border-radius:50%;background:var(--blue);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;transition:all .2s}
+.voice-btn.listening{background:var(--red);animation:pulse 1s infinite}
+.onboard-step{display:flex;gap:12px;align-items:flex-start;padding:10px;border-radius:8px;border:1px solid var(--border);margin-bottom:6px;background:var(--bg3)}
+.onboard-step.done{border-color:var(--green);background:#0d2318}
+.onboard-step.active{border-color:var(--amber);background:#1c1208}
+.step-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;background:var(--bg4);color:var(--text2)}
+.onboard-step.done .step-num{background:var(--green);color:#fff}
+.onboard-step.active .step-num{background:var(--amber);color:#000}
+.scroll-area{max-height:380px;overflow-y:auto}
+.scroll-area::-webkit-scrollbar{width:4px}
+.scroll-area::-webkit-scrollbar-track{background:transparent}
+.scroll-area::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+textarea.input-field{resize:vertical}
+</style>
+</head>
+<body>
+
+<!-- ===================== TOP BAR ===================== -->
+<div class="topbar">
+  <div class="logo">Enterprise<span>HR</span>.AI</div>
+  <div class="agent-pills">
+    <div class="pill active" id="pill-recruit">🤖 Recruit</div>
+    <div class="pill idle"   id="pill-leave">📋 Leave</div>
+    <div class="pill idle"   id="pill-payroll">💰 Payroll</div>
+    <div class="pill idle"   id="pill-compliance">⚖️ Compliance</div>
+    <div class="pill warn"   id="pill-burnout">🔥 Burnout</div>
+    <div class="pill idle"   id="pill-notify">🔔 Notify</div>
+  </div>
+  <div class="topright">
+    <span class="tag tag-green">● 45 Employees</span>
+    <span class="tag tag-amber">⚠ 3 Alerts</span>
+    <div class="badge" id="notif-count">3</div>
+  </div>
+</div>
+
+<!-- ===================== MAIN LAYOUT ===================== -->
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="nav-section">Dashboard</div>
+    <div class="nav-item active" onclick="show('dashboard',this)">📊 Overview</div>
+    <div class="nav-item" onclick="show('analytics',this)">📈 Analytics</div>
+    <div class="nav-section">AI Agents</div>
+    <div class="nav-item" onclick="show('chat',this)">💬 AI Assistant</div>
+    <div class="nav-item" onclick="show('multiagent',this)">🤖 Multi-Agent</div>
+    <div class="nav-item" onclick="show('orchestrator',this)">⚡ Orchestrator</div>
+    <div class="nav-section">HR Modules</div>
+    <div class="nav-item" onclick="show('recruitment',this)">🎯 Recruitment</div>
+    <div class="nav-item" onclick="show('leave',this)">📅 Leave Mgmt</div>
+    <div class="nav-item" onclick="show('payroll',this)">💸 Payroll</div>
+    <div class="nav-section">Intelligence</div>
+    <div class="nav-item" onclick="show('attrition',this)">📉 Attrition AI</div>
+    <div class="nav-item" onclick="show('burnout',this)">🔥 Burnout Detect</div>
+    <div class="nav-item" onclick="show('sentiment',this)">😊 Sentiment</div>
+    <div class="nav-section">Enterprise</div>
+    <div class="nav-item" onclick="show('onboarding',this)">🚀 Onboarding</div>
+    <div class="nav-item" onclick="show('compliance',this)">⚖️ Compliance</div>
+    <div class="nav-item" onclick="show('rag',this)">📚 Knowledge AI</div>
+    <div class="nav-item" onclick="show('voice',this)">🎙️ Voice AI</div>
+    <div class="nav-item" onclick="show('security',this)">🔒 Governance</div>
+  </div>
+
+  <!-- CONTENT AREA -->
+  <div class="content" id="main-content">
+
+    <!-- ============================================================
+         PANEL 1 — DASHBOARD
+    ============================================================ -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="section-title">Workforce Intelligence Dashboard</div>
+      <div class="section-sub">Real-time overview powered by 6 AI agents</div>
+
+      <div class="grid4" style="margin-bottom:14px">
+        <div class="card"><div class="card-title">Total Employees</div><div class="stat-big">45</div><div class="stat-label">Active headcount</div><div class="stat-delta delta-up">+3 this month</div></div>
+        <div class="card"><div class="card-title">Attrition Risk</div><div class="stat-big" style="color:var(--amber)">7</div><div class="stat-label">High-risk employees</div><div class="stat-delta delta-dn">↑2 from last week</div></div>
+        <div class="card"><div class="card-title">Burnout Alerts</div><div class="stat-big" style="color:var(--red)">4</div><div class="stat-label">Immediate attention</div><div class="stat-delta delta-dn">Critical level</div></div>
+        <div class="card"><div class="card-title">Open Positions</div><div class="stat-big" style="color:var(--blue)">11</div><div class="stat-label">Active JDs</div><div class="stat-delta delta-up">3 offers pending</div></div>
+      </div>
+
+      <div class="grid2" style="margin-bottom:14px">
+        <div class="card"><div class="card-title">Department Distribution</div><div id="dept-chart"></div></div>
+        <div class="card"><div class="card-title">AI Agent Activity (Live)</div><div id="agent-activity"></div></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card"><div class="card-title">Recent AI Decisions</div><div id="recent-decisions"></div></div>
+        <div class="card"><div class="card-title">Top Risk Employees</div><div id="risk-heatmap"></div></div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         PANEL 2 — AI ASSISTANT CHAT
+    ============================================================ -->
+    <div class="panel" id="panel-chat">
+      <div class="section-title">AI HR Assistant</div>
+      <div class="section-sub">Context-aware multi-agent chat with RAG + persistent memory</div>
+      <div class="chat-wrap">
+        <div class="chat-box">
+          <div class="chat-msgs" id="chat-msgs">
+            <div class="msg system">AI HR Assistant ready — 6 agents active</div>
+            <div class="msg ai"><div class="agent-tag">🤖 HR Assistant</div>Hello! I'm your Enterprise HR AI. I can help with leave management, payroll queries, recruitment, compliance checks, and more. I have context from your last 12 interactions. What do you need today?</div>
+          </div>
+          <div style="padding:8px 10px;border-top:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" onclick="quickChat('Apply sick leave for tomorrow')">Apply sick leave</button>
+            <button class="btn btn-ghost btn-sm" onclick="quickChat('Show my payslip for May')">Show payslip</button>
+            <button class="btn btn-ghost btn-sm" onclick="quickChat('What is maternity leave policy?')">Leave policy</button>
+            <button class="btn btn-ghost btn-sm" onclick="quickChat('Show my reimbursement history')">Reimbursements</button>
+            <button class="btn btn-ghost btn-sm" onclick="quickChat('Schedule Python interview tomorrow')">Schedule interview</button>
+          </div>
+          <div class="chat-input-row">
+            <input class="chat-input" id="chat-inp" placeholder="Ask anything about HR, leave, payroll, policies..." onkeydown="if(event.key==='Enter')sendChat()">
+            <button class="btn btn-primary" onclick="sendChat()">Send</button>
+          </div>
+        </div>
+
+        <!-- Agent status panel -->
+        <div class="ai-panel">
+          <div class="ai-header"><div class="dot green"></div>Active Agents</div>
+          <div class="agent-list" id="agent-list-panel">
+            <div class="agent-item agent-active"><div class="agent-name">🤖 Orchestrator</div><div class="agent-status">Routing requests</div></div>
+            <div class="agent-item"><div class="agent-name">📋 Leave Agent</div><div class="agent-status">Idle</div></div>
+            <div class="agent-item"><div class="agent-name">💰 Finance Agent</div><div class="agent-status">Idle</div></div>
+            <div class="agent-item"><div class="agent-name">⚖️ Compliance Agent</div><div class="agent-status">Idle</div></div>
+            <div class="agent-item"><div class="agent-name">🔔 Notify Agent</div><div class="agent-status">Idle</div></div>
+            <div class="agent-item"><div class="agent-name">📚 RAG Agent</div><div class="agent-status">Idle</div></div>
+          </div>
+          <div style="padding:10px;border-top:1px solid var(--border)">
+            <div class="card-title">Persistent Memory</div>
+            <div style="font-size:11px;color:var(--text2);line-height:1.7">
+              Last action: Leave 15 May<br>
+              Manager: Rajesh Kumar<br>
+              Balance: 8 CL, 12 SL<br>
+              Location: Chennai<br>
+              Grade: L3 – Senior
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         PANEL 3 — MULTI-AGENT
+    ============================================================ -->
+    <div class="panel" id="panel-multiagent">
+      <div class="section-title">Multi-Agent System</div>
+      <div class="section-sub">Watch agents collaborate in real-time to resolve complex HR requests</div>
+
+      <div class="grid2" style="margin-bottom:14px">
+        <div class="card">
+          <div class="card-title">Trigger Scenario</div>
+          <div style="background:var(--bg3);padding:10px;border-radius:8px;color:var(--text2);font-size:12px;margin-bottom:10px">
+            "I need leave for Friday and reimbursement approval for travel to Delhi ₹4,200"
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="btn btn-primary" onclick="runMultiAgent()">▶ Execute Multi-Agent Flow</button>
+            <button class="btn btn-ghost" onclick="runOffboardAgent()">⚡ Run Resignation Offboard Flow</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Agent Pipeline</div>
+          <div class="flow-steps" id="agent-pipeline">
+            <div class="flow-step wait"><div class="step-dot"></div><div><div style="font-size:12px;font-weight:600">Orchestrator</div><div style="font-size:11px;color:var(--text3)">Parse intent & route</div></div></div>
+            <div class="flow-step wait"><div class="step-dot"></div><div><div style="font-size:12px;font-weight:600">Leave Agent</div><div style="font-size:11px;color:var(--text3)">Check leave balance</div></div></div>
+            <div class="flow-step wait"><div class="step-dot"></div><div><div style="font-size:12px;font-weight:600">Finance Agent</div><div style="font-size:11px;color:var(--text3)">Validate reimbursement</div></div></div>
+            <div class="flow-step wait"><div class="step-dot"></div><div><div style="font-size:12px;font-weight:600">Compliance Agent</div><div style="font-size:11px;color:var(--text3)">Policy verification</div></div></div>
+            <div class="flow-step wait"><div class="step-dot"></div><div><div style="font-size:12px;font-weight:600">Notify Agent</div><div style="font-size:11px;color:var(--text3)">Alert manager</div></div></div>
+            <div class="flow-step wait"><div class="step-dot"></div><div><div style="font-size:12px;font-weight:600">Audit Agent</div><div style="font-size:11px;color:var(--text3)">Create audit log</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Agent Communication Log</div>
+        <div class="scroll-area" id="agent-comm-log" style="max-height:200px">
+          <div style="color:var(--text3);font-size:12px">Waiting for agent execution...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         PANEL 4 — ORCHESTRATOR
+    ============================================================ -->
+    <div class="panel" id="panel-orchestrator">
+      <div class="section-title">AI Workflow Orchestrator</div>
+      <div class="section-sub">Automated enterprise workflow execution engine</div>
+
+      <div class="grid2" style="margin-bottom:14px">
+        <div class="card">
+          <div class="card-title">Trigger Workflow</div>
+          <select class="input-field" id="workflow-select" style="margin-bottom:8px">
+            <option value="interview">Schedule Python Developer Interview</option>
+            <option value="onboard">New Employee Onboarding</option>
+            <option value="offboard">Employee Exit / Offboarding</option>
+            <option value="performance">Performance Review Cycle</option>
+            <option value="compliance">Compliance Audit Run</option>
+          </select>
+          <button class="btn btn-primary" style="width:100%" onclick="runWorkflow()">▶ Execute Workflow</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Workflow Stats Today</div>
+          <div class="grid2" style="gap:8px">
+            <div style="background:var(--bg3);padding:10px;border-radius:8px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--green)">247</div><div style="font-size:10px;color:var(--text3)">Completed</div></div>
+            <div style="background:var(--bg3);padding:10px;border-radius:8px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--blue)">3</div><div style="font-size:10px;color:var(--text3)">Running</div></div>
+            <div style="background:var(--bg3);padding:10px;border-radius:8px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--amber)">1.2s</div><div style="font-size:10px;color:var(--text3)">Avg Duration</div></div>
+            <div style="background:var(--bg3);padding:10px;border-radius:8px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--purple)">99.1%</div><div style="font-size:10px;color:var(--text3)">Success Rate</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Workflow Execution Steps</div>
+        <div id="workflow-steps" class="flow-steps">
+          <div style="color:var(--text3);font-size:12px;padding:10px">Select and run a workflow above to see execution</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         PANEL 5 — RECRUITMENT
+    ============================================================ -->
+    <div class="panel" id="panel-recruitment">
+      <div class="section-title">AI Recruitment Intelligence</div>
+      <div class="section-sub">Resume scoring, skill extraction, interview generation, fit prediction</div>
+
+      <div class="grid2" style="margin-bottom:14px">
+        <div class="card">
+          <div class="card-title">Resume Analyzer</div>
+          <div style="margin-bottom:8px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Select Candidate</div>
+            <select class="input-field" id="candidate-select">
+              <option value="0">Priya Sharma — Python Developer</option>
+              <option value="1">Arjun Mehta — Data Engineer</option>
+              <option value="2">Kavya Nair — ML Engineer</option>
+              <option value="3">Rahul Singh — DevOps</option>
+              <option value="4">Ananya Iyer — Frontend Dev</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="analyzeResume()">🤖 Analyze Resume</button>
+          <div id="resume-result" style="margin-top:12px"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Open Positions</div>
+          <div id="open-jds"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">AI Interview Copilot</div>
+        <div id="interview-copilot"></div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         PANEL 6 — LEAVE MANAGEMENT
+    ============================================================ -->
+    <div class="panel" id="panel-leave">
+      <div class="section-title">Leave Management</div>
+      <div class="section-sub">AI-powered leave processing with policy compliance and manager notification</div>
+
+      <div class="grid2" style="margin-bottom:14px">
+        <div class="card">
+          <div class="card-title">Apply Leave</div>
+          <div style="display:grid;gap:8px">
+            <select class="input-field" id="leave-emp">
+              <option>Priya Sharma</option><option>Arjun Mehta</option>
+              <option>Kavya Nair</option><option>Rajesh Kumar</option><option>Deepa Menon</option>
+            </select>
+            <select class="input-field" id="leave-type">
+              <option>Casual Leave</option><option>Sick Leave</option>
+              <option>Earned Leave</option><option>Maternity Leave</option><option>LOP</option>
+            </select>
+            <input class="input-field" type="date" id="leave-from" value="2024-06-10">
+            <input class="input-field" type="date" id="leave-to"   value="2024-06-10">
+            <input class="input-field" placeholder="Reason (optional)" id="leave-reason">
+            <button class="btn btn-primary" onclick="applyLeave()">🤖 AI Process Leave</button>
+          </div>
+        </div>
+        <div class="card"><div class="card-title">Leave Balances</div><div id="leave-balances"></div></div>
+      </div>
+
+      <div class="card"><div class="card-title">Leave Requests Queue</div><div id="leave-queue"></div></div>
+    </div>
+
+    <!-- ============================================================
+         PANEL 7 — PAYROLL
+    ============================================================ -->
+    <div class="panel" id="panel-payroll">
+      <div class="section-title">Payroll Intelligence</div>
+      <div class="section-sub">AI-powered payroll analysis with tax and deduction breakdown</div>
+
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-title">Employee Payslip Viewer</div>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <select class="input-field" id="payroll-emp">
+            <option value="0">Priya Sharma — L3 Senior Dev</option>
+            <option value="1">Arjun Mehta — L4 Tech Lead</option>
+            <option value="2">Kavya Nair — L2 Dev</option>
+            <option value="3">Rajesh Kumar — L5 Manager</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="showPayslip()">View</button>
+        </div>
+        <div id="payslip-view"></div>
+      </div>
+
+      <div class="card"><div class="card-title">Payroll AI Insights</div><div id="payroll-insights"></div></div>
+    </div>
+
+    <!-- ============================================================
+         PANEL 8 — ATTRITION
+    ============================================================ -->
+    <div class="panel" id="panel-attrition">
+      <div class="section-title">Predictive Attrition Intelligence</div>
+      <div class="section-sub">AI detects resignation risk signals 30–60 days in advance</div>
+
+      <div class="grid2" style="margin-bottom:14px">
+        <div class="card"><div class="card-title">High Risk Employees</div><div id="attrition-list"></div></div>
+        <div class="card"><div class="card-title">Risk Signal Analysis</div><div id="attrition-signals"></div></div>
+      </div>
+      <div class="card"><div class="card-title">AI Intervention Recommendations</div><div id="attrition-interventions"></div></div>
+    </div>
+
+    <!-- ============================================================
+         PANEL 9 — BURNOUT
+    ============================================================ -->
+    <div class="panel" id="panel-burnout">
+      <div class="section-title">Burnout Detection System</div>
+      <div class="section-sub">AI monitors work patterns to detect burnout early</div>
+
+      <div class="grid3" style="margin-bottom:14px">
+        <div class="card"><div class="card-title">Critical Burnout</div><div class="stat-big" style="color:var(--red)">4</div><div class="stat-label">Immediate intervention</div></div>
+        <div class="card"><div class="card-title">Moderate Risk</div><div class="stat-big" style="color:var(--amber)">8</div><div class="stat-label">Monitoring required</div></div>
+        <div class="card"><div class="card-title">Healthy</div><div class="stat-big" style="color:var(--green)">33</div><div class="stat-label">Within healthy limits</div></div>
+      </div>
+      <div class="card"><div class="card-title">Burnout Monitor — All Employees</div><div id="burnout-list"></div></div>
+    </div>
+
+    <!-- ============================================================
+         PANEL 10 — SENTIMENT
+    ============================================================ -->
+    <div class="panel" id="panel-sentiment">
+      <div class="section-title">Sentiment &amp; Emotion Analysis</div>
+      <div class="section-sub">AI detects emotional patterns from employee feedback and messages</div>
+
+      <div class="grid2" style="margin-bottom:14px">
+        <div class="card">
+          <div class="card-title">Analyze Text Sentiment</div>
+          <textarea class="input-field" id="sentiment-input" rows="5" placeholder="Paste employee feedback, email, or message here...">I've been working really hard but I feel like my efforts are not recognized. The project deadlines are unrealistic and I'm constantly stressed. I barely have time for my family anymore.</textarea>
+          <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="analyzeSentiment()">🤖 Analyze Emotion</button>
+          <div id="sentiment-result" style="margin-top:10px"></div>
+        </div>
+        <div class="card"><div class="card-title">Team Sentiment Overview</div><div id="sentiment-overview"></div></div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         PANEL 11 — ONBOARDING
+    ============================================================ -->
+    <div class="panel" id="panel-onboarding">
+      <div class="section-title">Autonomous Onboarding System</div>
+      <div class="section-sub">AI automates complete new employee onboarding in minutes</div>
+
+      <div class="grid2" style="margin-bottom:14px">
+        <div class="card">
+          <div class="card-title">New Employee Details</div>
+          <div style="display:grid;gap:8px">
+            <input class="input-field" id="new-emp-name"  placeholder="Full Name"  value="Meera Krishnamurthy">
+            <input class="input-field" id="new-emp-role"  placeholder="Job Title"  value="Senior Data Scientist">
+            <select class="input-field" id="new-emp-dept">
+              <option>Engineering</option><option selected>Data Science</option>
+              <option>HR</option><option>Finance</option><option>Marketing</option>
+            </select>
+            <input class="input-field" id="new-emp-email" placeholder="Email" value="meera.k@company.com">
+            <input class="input-field" type="date" id="new-emp-doj" value="2024-06-15">
+            <button class="btn btn-primary" onclick="startOnboarding()">🚀 Start AI Onboarding</button>
+          </div>
+        </div>
+        <div class="card"><div class="card-title">Onboarding Progress</div><div id="onboarding-steps"><div style="color:var(--text3);font-size:12px;padding:8px">Fill details and click Start AI Onboarding</div></div></div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         PANEL 12 — COMPLIANCE
+    ============================================================ -->
+    <div class="panel" id="panel-compliance">
+      <div class="section-title">AI Compliance Monitoring</div>
+      <div class="section-sub">Automated policy violation detection and reporting</div>
+
+      <div class="grid2" style="margin-bottom:14px">
+        <div class="card"><div class="card-title">Active Violations</div><div id="compliance-violations"></div></div>
+        <div class="card"><div class="card-title">Compliance Score by Department</div><div id="compliance-scores"></div></div>
+      </div>
+      <div class="card"><div class="card-title">Audit Trail (Last 10 Entries)</div><div id="audit-trail"></div></div>
+    </div>
+
+    <!-- ============================================================
+         PANEL 13 — RAG KNOWLEDGE
+    ============================================================ -->
+    <div class="panel" id="panel-rag">
+      <div class="section-title">Enterprise Knowledge AI (RAG)</div>
+      <div class="section-sub">AI retrieves answers from HR policies, SOPs, and documents dynamically</div>
+
+      <div class="grid2" style="margin-bottom:14px">
+        <div class="card">
+          <div class="card-title">Query Knowledge Base</div>
+          <select class="input-field" id="rag-query" style="margin-bottom:8px">
+            <option>What is maternity leave policy for Chennai branch?</option>
+            <option>What is the reimbursement limit for domestic travel?</option>
+            <option>How many casual leaves can be carried forward?</option>
+            <option>What is the notice period policy for L3 grade?</option>
+            <option>What is the medical insurance coverage limit?</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="runRAG()">🔍 Search Knowledge Base</button>
+          <div id="rag-result" style="margin-top:12px"></div>
+        </div>
+        <div class="card"><div class="card-title">Knowledge Sources</div><div id="knowledge-sources"></div></div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         PANEL 14 — VOICE AI
+    ============================================================ -->
+    <div class="panel" id="panel-voice">
+      <div class="section-title">Voice AI HR Assistant</div>
+      <div class="section-sub">Speak to apply leave, check balances, and get instant answers</div>
+
+      <div class="grid2">
+        <div class="card" style="text-align:center">
+          <div class="card-title">Voice Interface</div>
+          <div style="margin:20px 0">
+            <button class="voice-btn" id="voice-btn" onclick="toggleVoice()" style="margin:0 auto">🎙️</button>
+            <div style="margin-top:12px;font-size:12px;color:var(--text2)" id="voice-status">Tap to speak</div>
+          </div>
+          <div id="voice-transcript" style="background:var(--bg3);border-radius:8px;padding:12px;min-height:50px;font-size:12px;color:var(--text2);text-align:left;margin-bottom:10px">Voice transcript appears here...</div>
+          <div id="voice-response" style="background:var(--bg3);border-radius:8px;padding:12px;min-height:50px;font-size:12px;text-align:left"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Sample Voice Commands</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="btn btn-ghost" onclick="simulateVoice('Apply sick leave for tomorrow')">🎤 "Apply sick leave for tomorrow"</button>
+            <button class="btn btn-ghost" onclick="simulateVoice('What is my leave balance?')">🎤 "What is my leave balance?"</button>
+            <button class="btn btn-ghost" onclick="simulateVoice('When is my next salary?')">🎤 "When is my next salary?"</button>
+            <button class="btn btn-ghost" onclick="simulateVoice('Book a cab for office visit')">🎤 "Book cab for office visit"</button>
+            <button class="btn btn-ghost" onclick="simulateVoice('Show my pending approvals')">🎤 "Show pending approvals"</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         PANEL 15 — SECURITY / GOVERNANCE
+    ============================================================ -->
+    <div class="panel" id="panel-security">
+      <div class="section-title">AI Governance &amp; Security Layer</div>
+      <div class="section-sub">RBAC, unauthorized access prevention, full audit trail</div>
+
+      <div class="grid2" style="margin-bottom:14px">
+        <div class="card">
+          <div class="card-title">RBAC Access Control Test</div>
+          <div style="display:grid;gap:8px">
+            <select class="input-field" id="rbac-user">
+              <option value="employee">Priya Sharma (L3 Employee)</option>
+              <option value="manager">Rajesh Kumar (L5 Manager)</option>
+              <option value="hr">Deepa Menon (HR Admin)</option>
+              <option value="ceo">Vikram Nair (CEO)</option>
+            </select>
+            <select class="input-field" id="rbac-action">
+              <option value="view_own_salary">View own salary</option>
+              <option value="view_others_salary">View another employee's salary</option>
+              <option value="approve_leave">Approve team leave</option>
+              <option value="view_all_salaries">View all salaries</option>
+              <option value="delete_employee">Delete employee record</option>
+              <option value="run_payroll">Run payroll</option>
+            </select>
+            <button class="btn btn-primary" onclick="checkRBAC()">🔒 Check Access</button>
+            <div id="rbac-result"></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-title">Security Audit Log</div><div id="security-log"></div></div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         PANEL 16 — ANALYTICS
+    ============================================================ -->
+    <div class="panel" id="panel-analytics">
+      <div class="section-title">Enterprise Analytics AI</div>
+      <div class="section-sub">AI-generated workforce insights and predictive hiring forecasts</div>
+
+      <div class="grid4" style="margin-bottom:14px">
+        <div class="card"><div class="card-title">Avg Tenure</div><div class="stat-big">3.2y</div><div class="stat-label">Company average</div></div>
+        <div class="card"><div class="card-title">Engagement Score</div><div class="stat-big" style="color:var(--green)">74%</div><div class="stat-label">+4% vs last quarter</div></div>
+        <div class="card"><div class="card-title">Hire Rate</div><div class="stat-big" style="color:var(--blue)">2.1/mo</div><div class="stat-label">Trailing 6 months</div></div>
+        <div class="card"><div class="card-title">Attrition Rate</div><div class="stat-big" style="color:var(--amber)">14%</div><div class="stat-label">Industry avg: 18%</div></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card"><div class="card-title">Workforce Demand Forecast (Q3 2024)</div><div id="forecast-chart"></div></div>
+        <div class="card"><div class="card-title">Department Burnout Risk</div><div id="dept-burnout"></div></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ============================================================
+     JAVASCRIPT — DATA + ALL LOGIC
+============================================================ -->
+<script>
+
+/* ===================== MOCK DATA — 45 EMPLOYEES ===================== */
+const employees = [
+  {id:1, name:"Priya Sharma",      role:"Senior Dev",         dept:"Engineering",  grade:"L3", loc:"Chennai",   salary:95000,  cl:8,  sl:12, el:15, risk:72, burnout:85, overtime:62, color:"#3b82f6", avatar:"PS"},
+  {id:2, name:"Arjun Mehta",       role:"Tech Lead",           dept:"Engineering",  grade:"L4", loc:"Mumbai",    salary:130000, cl:6,  sl:10, el:20, risk:35, burnout:40, overtime:48, color:"#8b5cf6", avatar:"AM"},
+  {id:3, name:"Kavya Nair",        role:"ML Engineer",         dept:"Data Science", grade:"L3", loc:"Bangalore", salary:105000, cl:10, sl:8,  el:12, risk:55, burnout:68, overtime:55, color:"#10b981", avatar:"KN"},
+  {id:4, name:"Rajesh Kumar",      role:"Engineering Mgr",     dept:"Engineering",  grade:"L5", loc:"Chennai",   salary:180000, cl:5,  sl:15, el:25, risk:20, burnout:30, overtime:42, color:"#f59e0b", avatar:"RK"},
+  {id:5, name:"Deepa Menon",       role:"HR Manager",          dept:"HR",           grade:"L4", loc:"Chennai",   salary:120000, cl:7,  sl:12, el:18, risk:15, burnout:25, overtime:38, color:"#ec4899", avatar:"DM"},
+  {id:6, name:"Vikram Nair",       role:"VP Engineering",      dept:"Engineering",  grade:"L6", loc:"Bangalore", salary:280000, cl:5,  sl:15, el:30, risk:10, burnout:20, overtime:50, color:"#14b8a6", avatar:"VN"},
+  {id:7, name:"Sana Shaikh",       role:"Frontend Dev",        dept:"Engineering",  grade:"L2", loc:"Mumbai",    salary:75000,  cl:9,  sl:10, el:8,  risk:60, burnout:72, overtime:58, color:"#06b6d4", avatar:"SS"},
+  {id:8, name:"Kiran Reddy",       role:"DevOps Engineer",     dept:"DevOps",       grade:"L3", loc:"Hyderabad", salary:90000,  cl:8,  sl:12, el:15, risk:28, burnout:35, overtime:45, color:"#ef4444", avatar:"KR"},
+  {id:9, name:"Pooja Iyer",        role:"Data Analyst",        dept:"Data Science", grade:"L2", loc:"Chennai",   salary:65000,  cl:10, sl:10, el:5,  risk:82, burnout:90, overtime:70, color:"#f97316", avatar:"PI"},
+  {id:10,name:"Arun Joshi",        role:"Backend Dev",         dept:"Engineering",  grade:"L3", loc:"Pune",      salary:88000,  cl:6,  sl:8,  el:14, risk:45, burnout:52, overtime:50, color:"#84cc16", avatar:"AJ"},
+  {id:11,name:"Meera Pillai",      role:"Product Manager",     dept:"Product",      grade:"L4", loc:"Bangalore", salary:145000, cl:5,  sl:12, el:20, risk:22, burnout:28, overtime:44, color:"#a78bfa", avatar:"MP"},
+  {id:12,name:"Suresh Babu",       role:"QA Engineer",         dept:"QA",           grade:"L2", loc:"Chennai",   salary:60000,  cl:10, sl:10, el:6,  risk:35, burnout:45, overtime:42, color:"#34d399", avatar:"SB"},
+  {id:13,name:"Anita Singh",       role:"Scrum Master",        dept:"Engineering",  grade:"L3", loc:"Delhi",     salary:95000,  cl:7,  sl:10, el:15, risk:30, burnout:38, overtime:43, color:"#fb7185", avatar:"AS"},
+  {id:14,name:"Ravi Shankar",      role:"DBA",                 dept:"DevOps",       grade:"L3", loc:"Hyderabad", salary:85000,  cl:8,  sl:12, el:12, risk:40, burnout:48, overtime:47, color:"#fbbf24", avatar:"RS"},
+  {id:15,name:"Latha Kumari",      role:"HR Recruiter",        dept:"HR",           grade:"L2", loc:"Chennai",   salary:55000,  cl:10, sl:10, el:8,  risk:25, burnout:32, overtime:40, color:"#38bdf8", avatar:"LK"},
+  {id:16,name:"Nikhil Verma",      role:"Cloud Architect",     dept:"DevOps",       grade:"L5", loc:"Bangalore", salary:200000, cl:5,  sl:15, el:25, risk:18, burnout:22, overtime:46, color:"#c084fc", avatar:"NV"},
+  {id:17,name:"Divya Krishnan",    role:"UX Designer",         dept:"Product",      grade:"L3", loc:"Mumbai",    salary:82000,  cl:8,  sl:10, el:14, risk:33, burnout:40, overtime:42, color:"#f472b6", avatar:"DK"},
+  {id:18,name:"Manoj Tiwari",      role:"Finance Analyst",     dept:"Finance",      grade:"L3", loc:"Delhi",     salary:78000,  cl:9,  sl:10, el:12, risk:28, burnout:35, overtime:43, color:"#4ade80", avatar:"MT"},
+  {id:19,name:"Swetha Raj",        role:"ML Researcher",       dept:"Data Science", grade:"L4", loc:"Bangalore", salary:125000, cl:6,  sl:12, el:18, risk:48, burnout:60, overtime:56, color:"#fb923c", avatar:"SR"},
+  {id:20,name:"Prasad Rao",        role:"Support Engineer",    dept:"Engineering",  grade:"L2", loc:"Hyderabad", salary:58000,  cl:10, sl:10, el:6,  risk:55, burnout:65, overtime:52, color:"#a3e635", avatar:"PR"},
+  {id:21,name:"Nisha Gupta",       role:"Marketing Manager",   dept:"Marketing",    grade:"L4", loc:"Delhi",     salary:110000, cl:7,  sl:12, el:20, risk:20, burnout:28, overtime:40, color:"#22d3ee", avatar:"NG"},
+  {id:22,name:"Balaji Sundaram",   role:"Infra Engineer",      dept:"DevOps",       grade:"L3", loc:"Chennai",   salary:87000,  cl:8,  sl:12, el:14, risk:32, burnout:40, overtime:44, color:"#818cf8", avatar:"BS"},
+  {id:23,name:"Rekha Nambiar",     role:"Business Analyst",    dept:"Product",      grade:"L3", loc:"Kochi",     salary:80000,  cl:8,  sl:10, el:14, risk:25, burnout:30, overtime:41, color:"#fb7185", avatar:"RN"},
+  {id:24,name:"Vijay Kumar",       role:"Sr Backend Dev",      dept:"Engineering",  grade:"L4", loc:"Pune",      salary:120000, cl:6,  sl:10, el:18, risk:38, burnout:46, overtime:49, color:"#34d399", avatar:"VK"},
+  {id:25,name:"Archana Pillai",    role:"Compliance Officer",  dept:"Finance",      grade:"L4", loc:"Mumbai",    salary:115000, cl:6,  sl:12, el:20, risk:15, burnout:20, overtime:39, color:"#fcd34d", avatar:"AP"},
+  {id:26,name:"Gopal Krishnan",    role:"Embedded Dev",        dept:"Engineering",  grade:"L3", loc:"Coimbatore",salary:82000,  cl:8,  sl:10, el:14, risk:42, burnout:50, overtime:48, color:"#60a5fa", avatar:"GK"},
+  {id:27,name:"Sunita Patel",      role:"Content Writer",      dept:"Marketing",    grade:"L2", loc:"Ahmedabad", salary:52000,  cl:10, sl:10, el:6,  risk:20, burnout:25, overtime:38, color:"#f87171", avatar:"SP"},
+  {id:28,name:"Akash Dubey",       role:"iOS Developer",       dept:"Engineering",  grade:"L3", loc:"Indore",    salary:88000,  cl:8,  sl:10, el:14, risk:50, burnout:62, overtime:54, color:"#a78bfa", avatar:"AD"},
+  {id:29,name:"Leena Thomas",      role:"Payroll Specialist",  dept:"Finance",      grade:"L3", loc:"Chennai",   salary:72000,  cl:8,  sl:10, el:14, risk:18, burnout:22, overtime:40, color:"#6ee7b7", avatar:"LT"},
+  {id:30,name:"Sudhir Menon",      role:"Android Dev",         dept:"Engineering",  grade:"L3", loc:"Kochi",     salary:85000,  cl:8,  sl:10, el:14, risk:44, burnout:55, overtime:51, color:"#fbbf24", avatar:"SM"},
+  {id:31,name:"Chitra Devi",       role:"Talent Acquisition",  dept:"HR",           grade:"L3", loc:"Bangalore", salary:68000,  cl:9,  sl:10, el:14, risk:22, burnout:28, overtime:41, color:"#38bdf8", avatar:"CD"},
+  {id:32,name:"Manish Agarwal",    role:"SAP Consultant",      dept:"Finance",      grade:"L4", loc:"Noida",     salary:135000, cl:6,  sl:12, el:20, risk:28, burnout:35, overtime:45, color:"#c084fc", avatar:"MA"},
+  {id:33,name:"Usha Ramesh",       role:"Training Manager",    dept:"HR",           grade:"L4", loc:"Chennai",   salary:108000, cl:6,  sl:12, el:20, risk:15, burnout:20, overtime:40, color:"#fb923c", avatar:"UR"},
+  {id:34,name:"Dinesh Mohan",      role:"Network Engineer",    dept:"DevOps",       grade:"L3", loc:"Hyderabad", salary:80000,  cl:8,  sl:10, el:14, risk:30, burnout:38, overtime:43, color:"#4ade80", avatar:"DM2"},
+  {id:35,name:"Preethi Subbu",     role:"Legal Counsel",       dept:"Legal",        grade:"L5", loc:"Chennai",   salary:160000, cl:5,  sl:15, el:25, risk:12, burnout:18, overtime:42, color:"#f472b6", avatar:"PS2"},
+  {id:36,name:"Harish Venkat",     role:"Sr ML Engineer",      dept:"Data Science", grade:"L4", loc:"Bangalore", salary:140000, cl:6,  sl:12, el:18, risk:42, burnout:55, overtime:58, color:"#a3e635", avatar:"HV"},
+  {id:37,name:"Brinda Kapoor",     role:"Admin Manager",       dept:"Admin",        grade:"L3", loc:"Delhi",     salary:65000,  cl:9,  sl:10, el:14, risk:18, burnout:22, overtime:38, color:"#22d3ee", avatar:"BK"},
+  {id:38,name:"Santosh Kumar",     role:"QA Lead",             dept:"QA",           grade:"L4", loc:"Bangalore", salary:95000,  cl:7,  sl:12, el:18, risk:25, burnout:30, overtime:44, color:"#818cf8", avatar:"SK"},
+  {id:39,name:"Yamini Raj",        role:"Graphic Designer",    dept:"Marketing",    grade:"L2", loc:"Mumbai",    salary:55000,  cl:10, sl:10, el:6,  risk:22, burnout:28, overtime:39, color:"#fb7185", avatar:"YR"},
+  {id:40,name:"Sriram Iyer",       role:"Blockchain Dev",      dept:"Engineering",  grade:"L3", loc:"Bangalore", salary:115000, cl:8,  sl:10, el:14, risk:40, burnout:50, overtime:52, color:"#34d399", avatar:"SI"},
+  {id:41,name:"Nalini Mohanty",    role:"Chief HR Officer",    dept:"HR",           grade:"L7", loc:"Chennai",   salary:450000, cl:5,  sl:15, el:30, risk:5,  burnout:10, overtime:50, color:"#fcd34d", avatar:"NM"},
+  {id:42,name:"Kartik Sharma",     role:"Security Analyst",    dept:"DevOps",       grade:"L3", loc:"Delhi",     salary:92000,  cl:8,  sl:10, el:14, risk:28, burnout:36, overtime:46, color:"#60a5fa", avatar:"KS"},
+  {id:43,name:"Indra Nath",        role:"ERP Admin",           dept:"Finance",      grade:"L3", loc:"Noida",     salary:76000,  cl:8,  sl:10, el:14, risk:32, burnout:42, overtime:45, color:"#f87171", avatar:"IN"},
+  {id:44,name:"Rohini Das",        role:"Content Strategist",  dept:"Marketing",    grade:"L3", loc:"Kolkata",   salary:70000,  cl:9,  sl:10, el:14, risk:20, burnout:26, overtime:40, color:"#a78bfa", avatar:"RD"},
+  {id:45,name:"Vikash Pandey",     role:"Sr QA Engineer",      dept:"QA",           grade:"L3", loc:"Pune",      salary:78000,  cl:8,  sl:10, el:14, risk:35, burnout:45, overtime:46, color:"#6ee7b7", avatar:"VP"},
+];
+
+/* Department count map */
+const depts = {};
+employees.forEach(e => { depts[e.dept] = (depts[e.dept] || 0) + 1; });
+
+/* Leave request queue */
+const leaveRequests = [
+  {emp:"Priya Sharma",  type:"Sick Leave",   from:"Jun 10", to:"Jun 10", status:"AI Approved",    agent:"Leave Agent"},
+  {emp:"Arjun Mehta",   type:"Earned Leave", from:"Jun 15", to:"Jun 18", status:"Pending Manager", agent:"Leave Agent"},
+  {emp:"Kavya Nair",    type:"Casual Leave", from:"Jun 12", to:"Jun 12", status:"AI Approved",    agent:"Leave Agent"},
+  {emp:"Sana Shaikh",   type:"LOP",          from:"Jun 8",  to:"Jun 8",  status:"Escalated HR",   agent:"Compliance Agent"},
+  {emp:"Pooja Iyer",    type:"Sick Leave",   from:"Jun 5",  to:"Jun 7",  status:"AI Approved",    agent:"Leave Agent"},
+];
+
+/* RBAC permission matrix */
+const rbacMatrix = {
+  employee: {view_own_salary:true,  view_others_salary:false, approve_leave:false, view_all_salaries:false, delete_employee:false, run_payroll:false},
+  manager:  {view_own_salary:true,  view_others_salary:true,  approve_leave:true,  view_all_salaries:false, delete_employee:false, run_payroll:false},
+  hr:       {view_own_salary:true,  view_others_salary:true,  approve_leave:true,  view_all_salaries:true,  delete_employee:false, run_payroll:true},
+  ceo:      {view_own_salary:true,  view_others_salary:true,  approve_leave:true,  view_all_salaries:true,  delete_employee:true,  run_payroll:true},
+};
+
+/* ===================== NAVIGATION ===================== */
+function show(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  initPanel(id);
+}
+
+function initPanel(id) {
+  const map = {
+    dashboard:   initDashboard,
+    attrition:   initAttrition,
+    burnout:     initBurnout,
+    leave:       initLeave,
+    compliance:  initCompliance,
+    recruitment: initRecruitment,
+    payroll:     showPayslip,
+    sentiment:   initSentiment,
+    rag:         initRAG,
+    security:    initSecurity,
+    analytics:   initAnalytics,
+    onboarding:  initOnboarding,
+  };
+  if (map[id]) map[id]();
+}
+
+/* ===================== DASHBOARD ===================== */
+function initDashboard() {
+  /* Department chart */
+  const dc = document.getElementById('dept-chart');
+  if (!dc) return;
+  const colors = {Engineering:'var(--blue)',Data:'var(--purple)',HR:'var(--pink)',Finance:'var(--amber)',DevOps:'var(--teal)',Product:'var(--green)',Marketing:'var(--cyan)',QA:'var(--red)',Legal:'#64748b',Admin:'#94a3b8'};
+  dc.innerHTML = Object.entries(depts).sort((a,b)=>b[1]-a[1]).slice(0,7).map(([d,n]) => {
+    const pct = Math.round(n/45*100);
+    const c = Object.keys(colors).find(k=>d.includes(k)) || 'var(--blue)';
+    return `<div class="chart-bar-row"><div class="chart-label">${d}</div><div class="chart-bar"><div class="chart-fill" style="width:${pct*3}%;background:${colors[c]||'var(--blue)'}"></div></div><div class="chart-val">${n}</div></div>`;
+  }).join('');
+
+  /* Agent activity */
+  const aa = document.getElementById('agent-activity');
+  if (aa) {
+    const acts = [
+      {n:'Leave Agent',    s:'Processing 2 requests', c:'var(--green)',  w:75},
+      {n:'Recruit Agent',  s:'Screening resumes',     c:'var(--blue)',   w:60},
+      {n:'Burnout Detect', s:'Monitoring 45 emp',     c:'var(--red)',    w:100},
+      {n:'Compliance',     s:'Audit running',         c:'var(--amber)',  w:45},
+      {n:'RAG Agent',      s:'Indexing docs',         c:'var(--purple)', w:30},
+      {n:'Notify Agent',   s:'3 pending alerts',      c:'var(--teal)',   w:55},
+    ];
+    aa.innerHTML = acts.map(a =>
+      `<div class="chart-bar-row"><div class="chart-label" style="font-size:10px">${a.n}</div><div class="chart-bar"><div class="chart-fill" style="width:${a.w}%;background:${a.c}"></div></div><div style="font-size:10px;color:var(--text3);width:90px;text-align:right">${a.s}</div></div>`
+    ).join('');
+  }
+
+  /* Recent decisions */
+  const rd = document.getElementById('recent-decisions');
+  if (rd) {
+    const decisions = [
+      {t:'Leave Approved',     sub:'Priya Sharma — Sick Leave',         c:'var(--green)', tag:'Leave Agent'},
+      {t:'Attrition Alert',    sub:'Pooja Iyer — 82% risk',             c:'var(--red)',   tag:'Attrition AI'},
+      {t:'Resume Scored',      sub:'Arjun Mehta — 87% match',           c:'var(--blue)',  tag:'Recruit Agent'},
+      {t:'Policy Violation',   sub:'Late arrivals — Sana Shaikh',       c:'var(--amber)', tag:'Compliance'},
+      {t:'Burnout Flagged',    sub:'Pooja Iyer — Critical (90%)',        c:'var(--red)',   tag:'Burnout AI'},
+    ];
+    rd.innerHTML = decisions.map(d =>
+      `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)"><div style="width:6px;height:6px;border-radius:50%;background:${d.c};flex-shrink:0"></div><div style="flex:1"><div style="font-size:12px;font-weight:600">${d.t}</div><div style="font-size:11px;color:var(--text3)">${d.sub}</div></div><span class="tag tag-gray">${d.tag}</span></div>`
+    ).join('');
+  }
+
+  /* Risk heatmap */
+  const rh = document.getElementById('risk-heatmap');
+  if (rh) {
+    const high = [...employees].sort((a,b)=>b.risk-a.risk).slice(0,6);
+    rh.innerHTML = high.map(e =>
+      `<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:11px">${e.name}</span><span style="font-size:11px;color:${e.risk>=70?'var(--red)':'var(--amber)'}">${e.risk}%</span></div><div class="risk-bar"><div class="risk-fill" style="width:${e.risk}%;background:${e.risk>=70?'var(--red)':'var(--amber)'}"></div></div></div>`
+    ).join('');
+  }
+}
+
+/* ===================== ATTRITION ===================== */
+function initAttrition() {
+  const sorted = [...employees].sort((a,b) => b.risk - a.risk).slice(0,10);
+
+  const al = document.getElementById('attrition-list');
+  if (al) al.innerHTML = sorted.map(e =>
+    `<div class="emp-row"><div class="emp-avatar" style="background:${e.color}20;color:${e.color}">${e.avatar.substring(0,2)}</div><div style="flex:1"><div class="emp-name">${e.name}</div><div class="emp-role">${e.role} · ${e.loc}</div><div class="risk-bar"><div class="risk-fill" style="width:${e.risk}%;background:${e.risk>=70?'var(--red)':e.risk>=50?'var(--amber)':'var(--green)'}"></div></div></div><span class="tag ${e.risk>=70?'tag-red':e.risk>=50?'tag-amber':'tag-green'}">${e.risk}%</span></div>`
+  ).join('');
+
+  const as = document.getElementById('attrition-signals');
+  if (as) as.innerHTML = `
+    <div class="alert alert-red">🕐 Overtime Increase: Pooja Iyer working 70hrs/week (↑40%)</div>
+    <div class="alert alert-amber">📉 Engagement Drop: Priya Sharma — engagement score fell 23pts</div>
+    <div class="alert alert-red">📱 Low Activity: Pooja Iyer — login frequency dropped 60%</div>
+    <div class="alert alert-amber">🗣 Negative Sentiment: Multiple negative feedback from Sana Shaikh</div>
+    <div class="alert alert-amber">📅 Leave Avoidance: Kavya Nair — 0 leaves in 90 days</div>
+  `;
+
+  const ai = document.getElementById('attrition-interventions');
+  if (ai) ai.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <div class="card" style="border-color:var(--red)"><div style="font-weight:700;color:var(--red);margin-bottom:4px">🚨 Pooja Iyer</div><div style="font-size:11px;color:var(--text2)">Risk: 82% — Immediate</div><div style="font-size:11px;margin-top:6px">• Schedule 1:1 with HRBP<br>• Reduce workload 30%<br>• Enroll in wellness program</div></div>
+      <div class="card" style="border-color:var(--amber)"><div style="font-weight:700;color:var(--amber);margin-bottom:4px">⚠️ Priya Sharma</div><div style="font-size:11px;color:var(--text2)">Risk: 72% — High</div><div style="font-size:11px;margin-top:6px">• Career growth discussion<br>• Salary revision review<br>• Project rotation offer</div></div>
+      <div class="card" style="border-color:var(--amber)"><div style="font-weight:700;color:var(--amber);margin-bottom:4px">⚠️ Sana Shaikh</div><div style="font-size:11px;color:var(--text2)">Risk: 60% — Moderate</div><div style="font-size:11px;margin-top:6px">• Manager feedback session<br>• Skill development plan<br>• Peer mentoring pairing</div></div>
+    </div>
+  `;
+}
+
+/* ===================== BURNOUT ===================== */
+function initBurnout() {
+  const bl = document.getElementById('burnout-list');
+  if (!bl) return;
+  const sorted = [...employees].sort((a,b) => b.burnout - a.burnout);
+  bl.innerHTML = `<table class="table">
+    <thead><tr><th>Employee</th><th>Department</th><th>Overtime hrs/wk</th><th>Burnout Score</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>${sorted.slice(0,15).map(e =>
+      `<tr>
+        <td><div style="display:flex;align-items:center;gap:8px"><div class="emp-avatar" style="width:26px;height:26px;font-size:9px;background:${e.color}20;color:${e.color}">${e.avatar.substring(0,2)}</div>${e.name}</div></td>
+        <td style="color:var(--text2)">${e.dept}</td>
+        <td>${e.overtime}</td>
+        <td><div style="display:flex;align-items:center;gap:6px"><div class="risk-bar" style="width:80px"><div class="risk-fill" style="width:${e.burnout}%;background:${e.burnout>=75?'var(--red)':e.burnout>=50?'var(--amber)':'var(--green)'}"></div></div><span style="font-size:11px">${e.burnout}%</span></div></td>
+        <td><span class="tag ${e.burnout>=75?'tag-red':e.burnout>=50?'tag-amber':'tag-green'}">${e.burnout>=75?'Critical':e.burnout>=50?'Moderate':'Healthy'}</span></td>
+        <td><button class="btn btn-ghost btn-sm" onclick="alert('Wellness notification sent for ${e.name}!')">Intervene</button></td>
+      </tr>`
+    ).join('')}</tbody>
+  </table>`;
+}
+
+/* ===================== LEAVE ===================== */
+function initLeave() {
+  const lb = document.getElementById('leave-balances');
+  if (lb) lb.innerHTML = employees.slice(0,8).map(e =>
+    `<div class="emp-row"><div class="emp-avatar" style="width:26px;height:26px;font-size:10px;background:${e.color}20;color:${e.color}">${e.avatar.substring(0,2)}</div><div style="flex:1"><div class="emp-name" style="font-size:12px">${e.name}</div><div style="display:flex;gap:4px;margin-top:3px"><span class="tag tag-blue">CL:${e.cl}</span><span class="tag tag-green">SL:${e.sl}</span><span class="tag tag-amber">EL:${e.el}</span></div></div></div>`
+  ).join('');
+
+  const lq = document.getElementById('leave-queue');
+  if (lq) lq.innerHTML = `<table class="table">
+    <thead><tr><th>Employee</th><th>Type</th><th>From</th><th>To</th><th>Status</th><th>Agent</th></tr></thead>
+    <tbody>${leaveRequests.map(r =>
+      `<tr><td>${r.emp}</td><td>${r.type}</td><td>${r.from}</td><td>${r.to}</td><td><span class="tag ${r.status.includes('Approved')?'tag-green':r.status.includes('Pending')?'tag-amber':'tag-red'}">${r.status}</span></td><td><span class="tag tag-blue">${r.agent}</span></td></tr>`
+    ).join('')}</tbody>
+  </table>`;
+}
+
+function applyLeave() {
+  const empName = document.getElementById('leave-emp').value;
+  const leaveType = document.getElementById('leave-type').value;
+  const from = document.getElementById('leave-from').value;
+  const to   = document.getElementById('leave-to').value;
+  const lq   = document.getElementById('leave-queue');
+
+  const steps = [
+    '✅ Intent detected — leave request',
+    '✅ Leave balance verified — sufficient',
+    '✅ Policy compliance checked — approved',
+    '✅ Manager notified via email',
+    '✅ Leave applied & audit log created',
+  ];
+  let i = 0;
+  lq.innerHTML = '<div style="padding:10px;font-size:12px;color:var(--text2)">⏳ AI processing leave request...</div>';
+  const interval = setInterval(() => {
+    if (i >= steps.length) {
+      clearInterval(interval);
+      leaveRequests.unshift({emp:empName, type:leaveType, from:from, to:to, status:'AI Approved', agent:'Leave Agent'});
+      initLeave();
+      return;
+    }
+    lq.innerHTML = '<div style="padding:10px;font-size:12px;line-height:1.8">' + steps.slice(0, i+1).join('<br>') + '</div>';
+    i++;
+  }, 600);
+}
+
+/* ===================== PAYROLL ===================== */
+function showPayslip() {
+  const sel = document.getElementById('payroll-emp');
+  if (!sel) return;
+  const e = employees[parseInt(sel.value)];
+  const gross = e.salary;
+  const pf    = Math.round(gross * 0.12);
+  const tds   = Math.round(gross * 0.10);
+  const esi   = Math.round(gross * 0.0075);
+  const net   = gross - pf - tds - esi;
+
+  const pv = document.getElementById('payslip-view');
+  if (pv) pv.innerHTML = `
+    <div style="background:var(--bg3);border-radius:8px;padding:10px;margin-bottom:10px">
+      <div style="font-weight:700;font-size:13px;margin-bottom:4px">${e.name} — ${e.grade} ${e.role}</div>
+      <div style="font-size:11px;color:var(--text2)">Pay Period: May 2024 | Location: ${e.loc}</div>
+    </div>
+    <div class="grid2">
+      <table class="table"><thead><tr><th>Earnings</th><th>Amount (₹)</th></tr></thead>
+        <tbody>
+          <tr><td>Basic Salary</td><td>₹${Math.round(gross*0.50).toLocaleString()}</td></tr>
+          <tr><td>HRA</td><td>₹${Math.round(gross*0.30).toLocaleString()}</td></tr>
+          <tr><td>Special Allowance</td><td>₹${Math.round(gross*0.15).toLocaleString()}</td></tr>
+          <tr><td>Other</td><td>₹${Math.round(gross*0.05).toLocaleString()}</td></tr>
+          <tr style="font-weight:700"><td>Gross Total</td><td>₹${gross.toLocaleString()}</td></tr>
+        </tbody>
+      </table>
+      <table class="table"><thead><tr><th>Deductions</th><th>Amount (₹)</th></tr></thead>
+        <tbody>
+          <tr><td>Provident Fund (12%)</td><td>₹${pf.toLocaleString()}</td></tr>
+          <tr><td>TDS</td><td>₹${tds.toLocaleString()}</td></tr>
+          <tr><td>ESI (0.75%)</td><td>₹${esi.toLocaleString()}</td></tr>
+          <tr style="font-weight:700;color:var(--green)"><td>Net Pay</td><td>₹${net.toLocaleString()}</td></tr>
+        </tbody>
+      </table>
+    </div>`;
+
+  const pi = document.getElementById('payroll-insights');
+  if (pi) pi.innerHTML = `
+    <div class="grid3">
+      <div class="alert alert-blue">💡 Tax saving: Invest ₹${Math.round(gross*0.15).toLocaleString()} in 80C to save ₹${Math.round(gross*0.015).toLocaleString()}</div>
+      <div class="alert alert-green">✅ PF compliance: Correct 12% deduction rate applied for ${e.grade}</div>
+      <div class="alert alert-amber">⚠️ HRA: Submit rent receipts to maximize ₹${Math.round(gross*0.1).toLocaleString()} exemption</div>
+    </div>`;
+}
+
+/* ===================== COMPLIANCE ===================== */
+function initCompliance() {
+  const cv = document.getElementById('compliance-violations');
+  if (cv) cv.innerHTML = `
+    <div class="alert alert-red">🚨 Sana Shaikh — Late arrival 8 times in May (policy: max 3)</div>
+    <div class="alert alert-amber">⚠️ Pooja Iyer — Working 70hrs/week (policy: max 60)</div>
+    <div class="alert alert-amber">⚠️ Prasad Rao — Mandatory leave not taken in Q1</div>
+    <div class="alert alert-blue">ℹ️ Akash Dubey — WFH >15 days without formal approval</div>
+  `;
+
+  const cs = document.getElementById('compliance-scores');
+  if (cs) {
+    const scores = [{d:'HR',s:97},{d:'Finance',s:92},{d:'QA',s:88},{d:'Marketing',s:90},{d:'DevOps',s:82},{d:'Engineering',s:78},{d:'Data Science',s:75}];
+    cs.innerHTML = scores.map(s =>
+      `<div class="chart-bar-row"><div class="chart-label">${s.d}</div><div class="chart-bar"><div class="chart-fill" style="width:${s.s}%;background:${s.s>=90?'var(--green)':s.s>=80?'var(--blue)':'var(--amber)'}"></div></div><div class="chart-val">${s.s}%</div></div>`
+    ).join('');
+  }
+
+  const at = document.getElementById('audit-trail');
+  if (at) {
+    const logs = [
+      {t:'Leave Approved',    u:'Leave Agent',      e:'Priya Sharma',              time:'10:32 AM'},
+      {t:'RBAC Denied',       u:'Security Layer',   e:'Employee tried viewing salary', time:'10:28 AM'},
+      {t:'Payroll Run',       u:'Finance Agent',    e:'May 2024 full cycle',       time:'09:15 AM'},
+      {t:'Attrition Alert',   u:'Attrition AI',     e:'Pooja Iyer flagged 82%',    time:'09:00 AM'},
+      {t:'Policy Violation',  u:'Compliance Agent', e:'Sana Shaikh attendance',    time:'08:45 AM'},
+      {t:'Resume Scored',     u:'Recruit Agent',    e:'Arjun Mehta — 87%',         time:'08:30 AM'},
+      {t:'Onboarding Started',u:'Onboard Agent',    e:'Meera Krishnamurthy',       time:'08:00 AM'},
+    ];
+    at.innerHTML = `<table class="table">
+      <thead><tr><th>Action</th><th>Agent / User</th><th>Details</th><th>Time</th></tr></thead>
+      <tbody>${logs.map(l => `<tr><td>${l.t}</td><td><span class="tag tag-blue">${l.u}</span></td><td style="color:var(--text2)">${l.e}</td><td style="color:var(--text3)">${l.time}</td></tr>`).join('')}</tbody>
+    </table>`;
+  }
+}
+
+/* ===================== RECRUITMENT ===================== */
+function initRecruitment() {
+  const oj = document.getElementById('open-jds');
+  if (oj) oj.innerHTML = [
+    {role:'Python Developer',   dept:'Engineering',  level:'L3', apps:23},
+    {role:'ML Engineer',        dept:'Data Science', level:'L3', apps:18},
+    {role:'DevOps Architect',   dept:'DevOps',       level:'L4', apps:12},
+    {role:'Product Manager',    dept:'Product',      level:'L4', apps:31},
+    {role:'React Developer',    dept:'Engineering',  level:'L2', apps:44},
+    {role:'Data Analyst',       dept:'Data Science', level:'L2', apps:27},
+  ].map(j =>
+    `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><div><div style="font-weight:600;font-size:12px">${j.role}</div><div style="font-size:11px;color:var(--text2)">${j.dept} · ${j.level}</div></div><span class="tag tag-blue">${j.apps} applicants</span></div>`
+  ).join('');
+
+  const ic = document.getElementById('interview-copilot');
+  if (ic) ic.innerHTML = `
+    <div class="grid3">
+      <div class="card">
+        <div style="font-weight:700;margin-bottom:6px">Technical Questions (AI Generated)</div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.8">1. Explain Python GIL and threading<br>2. Design a rate limiter at scale<br>3. Generator vs iterator difference<br>4. Async/await deep dive<br>5. Memory management in Python<br>6. Describe SOLID principles<br>7. REST vs GraphQL trade-offs<br>8. Docker and K8s best practices</div>
+      </div>
+      <div class="card">
+        <div style="font-weight:700;margin-bottom:6px">Behavioral Questions</div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.8">1. Describe a challenging tech decision<br>2. How do you handle tech debt?<br>3. Conflict resolution in team<br>4. Biggest project failure & learning<br>5. Remote collaboration approach<br>6. How do you stay updated on tech?</div>
+      </div>
+      <div class="card">
+        <div style="font-weight:700;margin-bottom:6px">AI Evaluation Scorecard</div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.8">Technical Depth: /30<br>Problem Solving: /25<br>Communication: /20<br>Culture Fit: /15<br>Leadership Potential: /10</div>
+        <button class="btn btn-primary btn-sm" style="margin-top:10px;width:100%" onclick="this.textContent='✅ Report Saved to ATS!'">Generate Report</button>
+      </div>
+    </div>`;
+}
+
+function analyzeResume() {
+  const idx = parseInt(document.getElementById('candidate-select').value);
+  const candidates = [
+    {name:'Priya Sharma',  match:87, skills:['Python','Django','FastAPI','PostgreSQL','Docker'],           missing:['Kubernetes','Kafka'],          exp:'4 years', pred:'High Fit'},
+    {name:'Arjun Mehta',   match:92, skills:['Python','Spark','Kafka','AWS','Airflow','SQL'],              missing:['FastAPI'],                      exp:'6 years', pred:'Excellent Fit'},
+    {name:'Kavya Nair',    match:78, skills:['Python','TensorFlow','PyTorch','MLflow','Scikit-learn'],     missing:['Django','Docker','Kubernetes'], exp:'3 years', pred:'Good Fit'},
+    {name:'Rahul Singh',   match:65, skills:['Python','Ansible','Terraform','AWS','Linux'],                missing:['Django','FastAPI','Kafka'],     exp:'3 years', pred:'Moderate Fit'},
+    {name:'Ananya Iyer',   match:55, skills:['React','JavaScript','CSS','Node.js','TypeScript'],           missing:['Python','Django','Docker','K8s'],exp:'2 years', pred:'Low Fit — wrong stack'},
+  ];
+  const c = candidates[idx];
+  const rr = document.getElementById('resume-result');
+  rr.innerHTML = `
+    <div style="background:var(--bg3);border-radius:8px;padding:12px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <div style="font-size:22px;font-weight:700;color:${c.match>=80?'var(--green)':c.match>=65?'var(--amber)':'var(--red)'}">${c.match}%</div>
+        <div><div style="font-weight:600;font-size:12px">JD Match Score</div><div style="font-size:11px;color:var(--text2)">${c.pred}</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Skills Found</div>
+      <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px">${c.skills.map(s=>`<span class="tag tag-green">${s}</span>`).join('')}</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Missing Skills</div>
+      <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px">${c.missing.map(s=>`<span class="tag tag-red">${s}</span>`).join('')}</div>
+      <div style="font-size:11px;color:var(--text2)">Experience: ${c.exp}</div>
+      <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="this.textContent='✅ Interview Scheduled!'">Schedule Interview</button>
+    </div>`;
+}
+
+/* ===================== SENTIMENT ===================== */
+function initSentiment() {
+  const so = document.getElementById('sentiment-overview');
+  if (so) {
+    const data = [{d:'HR',s:82,c:'var(--green)'},{d:'Finance',s:70,c:'var(--blue)'},{d:'Marketing',s:76,c:'var(--green)'},{d:'DevOps',s:65,c:'var(--teal)'},{d:'Engineering',s:52,c:'var(--amber)'},{d:'Data Science',s:48,c:'var(--red)'}];
+    so.innerHTML = data.map(d =>
+      `<div class="chart-bar-row"><div class="chart-label">${d.d}</div><div class="chart-bar"><div class="chart-fill" style="width:${d.s}%;background:${d.c}"></div></div><div class="chart-val" style="color:${d.c}">${d.s}%</div></div>`
+    ).join('');
+  }
+}
+
+function analyzeSentiment() {
+  const text = document.getElementById('sentiment-input').value.toLowerCase();
+  const negative = ['stressed','unhappy','exhausted','overworked','frustrated','tired','overwhelmed','burnt','unfair','angry','worried'];
+  const positive = ['happy','excited','great','love','amazing','excellent','motivated','proud'];
+  let score = -0.2;
+  if (negative.filter(w => text.includes(w)).length >= 2) score = -0.7;
+  else if (positive.filter(w => text.includes(w)).length >= 2) score = 0.6;
+
+  const emotions = score < -0.5
+    ? {primary:'Stress & Burnout',    secondary:'Disengagement detected',  alert:'High — HRBP Notified',   cls:'alert-red'}
+    : score < 0
+    ? {primary:'Mild Negativity',      secondary:'Work pressure detected',  alert:'Moderate — Monitor',      cls:'alert-amber'}
+    : {primary:'Positive & Engaged',   secondary:'Healthy sentiment',       alert:'None',                    cls:'alert-green'};
+
+  document.getElementById('sentiment-result').innerHTML = `
+    <div class="alert ${emotions.cls}">
+      <div>
+        <div style="font-weight:700;margin-bottom:4px">Primary Emotion: ${emotions.primary}</div>
+        <div style="font-size:11px">Secondary signal: ${emotions.secondary}</div>
+        <div style="font-size:11px;margin-top:4px">Alert Level: ${emotions.alert}</div>
+        ${score < -0.3 ? '<div style="font-size:11px;margin-top:6px">🔔 HR alert triggered — manager and HRBP notified automatically</div>' : ''}
+      </div>
+    </div>`;
+}
+
+/* ===================== ONBOARDING ===================== */
+function initOnboarding() { /* Placeholder — steps shown on button click */ }
+
+function startOnboarding() {
+  const name = document.getElementById('new-emp-name').value || 'New Employee';
+  const first = name.split(' ')[0].toLowerCase();
+  const steps = [
+    `Creating email: ${first}@company.com`,
+    'Raising laptop request in IT portal',
+    `Generating Employee ID: EMP-2024-046`,
+    'Activating payroll record in HRMS',
+    'Scheduling induction for Day 1',
+    'Creating Microsoft Teams account',
+    'Assigning initial LMS training modules',
+    'Notifying reporting manager via email',
+    `Onboarding complete for ${name} ✅`,
+  ];
+  const os = document.getElementById('onboarding-steps');
+  os.innerHTML = '';
+  steps.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'onboard-step wait';
+    div.innerHTML = `<div class="step-num">${i+1}</div><div style="font-size:12px">${s}</div>`;
+    os.appendChild(div);
+    setTimeout(() => {
+      div.className = 'onboard-step active';
+      div.querySelector('.step-num').textContent = '…';
+      setTimeout(() => {
+        div.className = 'onboard-step done';
+        div.querySelector('.step-num').textContent = i+1;
+      }, 500);
+    }, i * 600);
+  });
+}
+
+/* ===================== RAG KNOWLEDGE BASE ===================== */
+function initRAG() {
+  const ks = document.getElementById('knowledge-sources');
+  if (ks) ks.innerHTML = [
+    'HR_Policy_v4.2.pdf (34 pages)',
+    'Leave_Rules_2024.pdf (12 pages)',
+    'Compensation_Framework.pdf (28 pages)',
+    'Compliance_SOPs.pdf (45 pages)',
+    'Benefits_Handbook.pdf (22 pages)',
+    'IT_Security_Policy.pdf (18 pages)',
+    'Employee_Code_of_Conduct.pdf (10 pages)',
+  ].map(s =>
+    `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)"><span style="color:var(--red)">📄</span><span style="font-size:12px">${s}</span><span class="tag tag-green" style="margin-left:auto">Indexed</span></div>`
+  ).join('');
+}
+
+function runRAG() {
+  const q   = document.getElementById('rag-query').value;
+  const rr  = document.getElementById('rag-result');
+  rr.innerHTML = '<div style="color:var(--text3);font-size:11px;padding:8px">🔍 Searching enterprise knowledge base...</div>';
+
+  const answers = {
+    maternity:     ['HR_Policy_v4.2.pdf — Page 34',    '• 26 weeks paid maternity leave\n• Eligibility: Min 80 working days\n• Medical bonus: ₹3,500 one-time\n• WFH allowed: 12 weeks post-return\n• Applicable to all grades L1–L7'],
+    reimbursement: ['Compensation_Framework.pdf — Page 12', '• Domestic travel: ₹8,000/day (L3)\n• International travel: ₹25,000/day (L4+)\n• Receipt submission: within 30 days\n• Approval chain: Manager → Finance'],
+    casual:        ['Leave_Rules_2024.pdf — Page 3',    '• Carry forward: Max 5 CL per year\n• Lapse date: December 31\n• Encashment: Not applicable for CL\n• Minimum notice: 1 working day'],
+    notice:        ['HR_Policy_v4.2.pdf — Page 8',      '• L3 grade notice period: 60 days\n• Garden leave: allowed on HR approval\n• Buy-out: 1 month basic salary\n• Relieving letter: within 30 days'],
+    medical:       ['Benefits_Handbook.pdf — Page 5',   '• Individual cover: ₹3 lakhs/year\n• Family floater: ₹5 lakhs (spouse+2 kids)\n• Critical illness rider: ₹10 lakhs\n• Dental coverage: ₹15,000/year'],
+  };
+  const key  = Object.keys(answers).find(k => q.toLowerCase().includes(k)) || 'maternity';
+  const [src, ans] = answers[key];
+
+  setTimeout(() => {
+    rr.innerHTML = `
+      <div style="background:var(--bg3);border-radius:8px;padding:12px">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:6px">📄 Source: ${src}</div>
+        <div style="font-size:12px;line-height:1.9;white-space:pre-line;color:var(--text)">${ans}</div>
+        <div style="margin-top:8px;display:flex;gap:8px"><span class="tag tag-green">Relevance: 97%</span><span class="tag tag-blue">Context: Chennai + L3</span></div>
+      </div>`;
+  }, 900);
+}
+
+/* ===================== SECURITY / RBAC ===================== */
+function initSecurity() {
+  const sl = document.getElementById('security-log');
+  if (sl) sl.innerHTML = [
+    {a:'Leave Approved',       u:'Leave Agent',    r:'Allow', t:'10:32'},
+    {a:'View Own Salary',      u:'Priya Sharma',   r:'Allow', t:'10:28'},
+    {a:'View Other Salary',    u:'Priya Sharma',   r:'DENY',  t:'10:27'},
+    {a:'Payroll Run',          u:'Deepa Menon',    r:'Allow', t:'09:15'},
+    {a:'Delete Record',        u:'Rajesh Kumar',   r:'DENY',  t:'09:00'},
+    {a:'Export All Data',      u:'Unknown IP',     r:'DENY',  t:'08:45'},
+    {a:'View All Salaries',    u:'HR Admin',       r:'Allow', t:'08:30'},
+  ].map(l =>
+    `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)"><span class="tag ${l.r==='Allow'?'tag-green':'tag-red'}">${l.r}</span><div style="flex:1;font-size:11px">${l.a} — <span style="color:var(--text2)">${l.u}</span></div><span style="font-size:10px;color:var(--text3)">${l.t}</span></div>`
+  ).join('');
+}
+
+function checkRBAC() {
+  const user   = document.getElementById('rbac-user').value;
+  const action = document.getElementById('rbac-action').value;
+  const allowed = rbacMatrix[user][action];
+  const roleLabels   = {employee:'L3 Employee',manager:'L5 Manager',hr:'HR Admin',ceo:'CEO'};
+  const actionLabels = {view_own_salary:'View Own Salary',view_others_salary:"View Another Employee's Salary",approve_leave:'Approve Team Leave',view_all_salaries:'View All Salaries',delete_employee:'Delete Employee Record',run_payroll:'Run Payroll'};
+
+  document.getElementById('rbac-result').innerHTML = `
+    <div class="alert ${allowed ? 'alert-green' : 'alert-red'}" style="margin-top:8px">
+      <div>
+        <div style="font-weight:700">${allowed ? '✅ Access GRANTED' : '🚫 Access DENIED'}</div>
+        <div style="font-size:11px;margin-top:4px">
+          User: ${roleLabels[user]}<br>
+          Action: ${actionLabels[action]}<br>
+          ${!allowed ? 'Reason: Insufficient privilege level<br><span style="color:var(--red)">Audit log entry created automatically</span>' : 'Permission level sufficient for this action'}
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ===================== ANALYTICS ===================== */
+function initAnalytics() {
+  const fc = document.getElementById('forecast-chart');
+  if (fc) {
+    const deps = [{d:'Engineering',cur:18,fore:22},{d:'Data Science',cur:5,fore:8},{d:'DevOps',cur:6,fore:7},{d:'Product',cur:4,fore:5},{d:'Marketing',cur:4,fore:4},{d:'QA',cur:3,fore:4}];
+    fc.innerHTML = deps.map(d =>
+      `<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span>${d.d}</span><span style="color:var(--green)">+${d.fore-d.cur} needed</span></div>
+        <div style="display:flex;gap:4px;align-items:center">
+          <div class="chart-bar" style="flex:1"><div class="chart-fill" style="width:${d.cur/30*100}%;background:var(--blue)"></div></div>
+          <span style="font-size:10px;color:var(--blue);width:20px">${d.cur}</span>
+          <div class="chart-bar" style="flex:1"><div class="chart-fill" style="width:${d.fore/30*100}%;background:var(--green)"></div></div>
+          <span style="font-size:10px;color:var(--green);width:20px">${d.fore}</span>
+        </div>
+      </div>`
+    ).join('') + '<div style="display:flex;gap:12px;font-size:10px;color:var(--text3);margin-top:6px"><span style="color:var(--blue)">■ Current</span><span style="color:var(--green)">■ Q3 Forecast</span></div>';
+  }
+
+  const db = document.getElementById('dept-burnout');
+  if (db) {
+    const br = [{d:'Data Science',r:72},{d:'Engineering',r:68},{d:'DevOps',r:45},{d:'Finance',r:35},{d:'Marketing',r:32},{d:'HR',r:28}];
+    db.innerHTML = br.map(d =>
+      `<div class="chart-bar-row"><div class="chart-label">${d.d}</div><div class="chart-bar"><div class="chart-fill" style="width:${d.r}%;background:${d.r>=65?'var(--red)':d.r>=45?'var(--amber)':'var(--green)'}"></div></div><div class="chart-val" style="color:${d.r>=65?'var(--red)':d.r>=45?'var(--amber)':'var(--green)'}">${d.r}%</div></div>`
+    ).join('');
+  }
+}
+
+/* ===================== MULTI-AGENT EXECUTION ===================== */
+function runMultiAgent() {
+  const steps = document.querySelectorAll('#agent-pipeline .flow-step');
+  const log   = document.getElementById('agent-comm-log');
+  const msgs  = [
+    '🤖 Orchestrator: Parsed 2 intents — leave request + reimbursement',
+    '📋 Leave Agent: Checking balance for Priya Sharma... Balance: 8 CL ✅',
+    '📋 Leave Agent: Policy verified for Chennai L3 grade — approved',
+    '💰 Finance Agent: Validating ₹4,200 — within ₹8,000 domestic limit ✅',
+    '💰 Finance Agent: Category: Domestic Travel — approved per policy',
+    '⚖️ Compliance Agent: Both requests comply with HR Policy v4.2 ✅',
+    '🔔 Notify Agent: Email sent to Rajesh Kumar (Manager) at 10:34 AM',
+    '🔔 Notify Agent: SMS confirmation sent to Priya Sharma',
+    '📝 Audit Agent: Log entry #2847 created — Leave + Reimbursement',
+    '✅ All agents completed — Multi-agent flow successful in 2.3s',
+  ];
+  log.innerHTML = '';
+  steps.forEach(s => { s.className = 'flow-step wait'; s.querySelector('.step-dot').className = 'step-dot'; });
+
+  const stepMap = {0:[0,1], 1:[2,3], 2:[4,5], 3:[6,7], 4:[8], 5:[9]};
+  msgs.forEach((msg, i) => {
+    setTimeout(() => {
+      log.innerHTML += `<div style="font-size:11px;padding:5px 0;border-bottom:1px solid var(--border);color:${msg.includes('✅')?'var(--green)':msg.includes('🔔')?'var(--teal)':'var(--text2)'}">[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+      log.scrollTop = log.scrollHeight;
+
+      const stepIdx = Object.entries(stepMap).find(([,msgs]) => msgs.includes(i));
+      if (stepIdx) {
+        const si = parseInt(stepIdx[0]);
+        steps[si].className = 'flow-step active';
+        steps[si].querySelector('.step-dot').className = 'step-dot active';
+        if (i === Math.max(...stepMap[si])) {
+          setTimeout(() => { steps[si].className = 'flow-step done'; steps[si].querySelector('.step-dot').className = 'step-dot done'; }, 400);
+        }
+      }
+    }, i * 420);
+  });
+}
+
+function runOffboardAgent() {
+  const log = document.getElementById('agent-comm-log');
+  const offMsgs = [
+    '🤖 Orchestrator: Resignation trigger detected — Employee: Pooja Iyer',
+    '📋 HRMS Agent: Updating status to "Resigned" in HRMS ✅',
+    '🔒 IT Agent: Disabling Active Directory account ✅',
+    '🔒 IT Agent: Revoking VPN + email access ✅',
+    '💰 Finance Agent: Initiating Full & Final settlement ✅',
+    '🎙️ HR Agent: Scheduling exit interview for June 20 ✅',
+    '📝 Audit Agent: Exit log #EX-2024-012 created ✅',
+    '✅ Offboarding flow complete — all systems updated',
+  ];
+  log.innerHTML = '<div style="color:var(--amber);font-size:11px;font-weight:600;padding:5px 0">⚡ Running Resignation Offboard Flow...</div>';
+  offMsgs.forEach((msg, i) => {
+    setTimeout(() => {
+      log.innerHTML += `<div style="font-size:11px;padding:5px 0;border-bottom:1px solid var(--border);color:${msg.includes('✅')?'var(--green)':'var(--text2)'}">[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+      log.scrollTop = log.scrollHeight;
+    }, i * 450);
+  });
+}
+
+/* ===================== WORKFLOW ORCHESTRATOR ===================== */
+const workflows = {
+  interview:   ['Check interviewer panel availability in calendar','Create Google Meet / Teams event','Send invites to 2 panelists (Tech + HR)','Generate 8 technical + 3 HR questions via AI','Update ATS — status: Interview Scheduled','Send candidate confirmation email','Send reminder notification 30 min before'],
+  onboard:     ['Create corporate email address','Submit laptop request to IT helpdesk','Generate Employee ID (EMP-2024-046)','Activate payroll record in HRMS','Schedule Day-1 induction with buddy','Create Microsoft Teams & Slack accounts','Assign LMS onboarding courses'],
+  offboard:    ['Update HRMS — status: Resigned','Disable Active Directory & SSO','Notify IT for laptop & access card collection','Generate Full & Final settlement','Schedule exit interview with HRBP','Archive employee records securely','Send relieving letter within 30 days'],
+  performance: ['Pull KPI data from HRMS for all employees','Calculate weighted performance scores','Generate draft appraisal letters (AI)','Send to managers for review & edits','Collect digital sign-off from employees','Update compensation system with revisions'],
+  compliance:  ['Pull attendance data — all 45 employees','Run policy rule engine on each record','Flag violations exceeding threshold','Generate department-wise compliance report','Notify department heads of violations','Archive audit record with timestamp'],
+};
+
+function runWorkflow() {
+  const sel   = document.getElementById('workflow-select').value;
+  const steps = workflows[sel];
+  const ws    = document.getElementById('workflow-steps');
+  ws.innerHTML = '';
+  steps.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'flow-step wait';
+    div.innerHTML = `<div class="step-dot"></div><div><div style="font-size:12px;font-weight:600">Step ${i+1}</div><div style="font-size:11px;color:var(--text2)">${s}</div></div>`;
+    ws.appendChild(div);
+    setTimeout(() => {
+      div.className = 'flow-step active';
+      div.querySelector('.step-dot').className = 'step-dot active';
+      setTimeout(() => {
+        div.className = 'flow-step done';
+        div.querySelector('.step-dot').className = 'step-dot done';
+      }, 600);
+    }, i * 750);
+  });
+}
+
+/* ===================== AI CHAT ===================== */
+function getAIResponse(msg) {
+  const m = msg.toLowerCase();
+  if (m.includes('sick leave') || m.includes('apply leave')) {
+    activateAgent('Leave Agent');
+    return {agent:'📋 Leave Agent', color:'green', text:`✅ Sick leave applied for tomorrow.\n\nUpdated Balance:\n• Sick Leave: 11 remaining (was 12)\n• Casual Leave: 8 remaining\n\n✉️ Manager Rajesh Kumar notified.\n📝 Audit log #2848 created.`};
+  }
+  if (m.includes('leave balance') || (m.includes('leave') && m.includes('balance'))) {
+    activateAgent('Leave Agent');
+    return {agent:'📋 Leave Agent', color:'green', text:`📊 Leave Balance — Priya Sharma (L3, Chennai)\n\n• Casual Leave (CL): 8 days\n• Sick Leave (SL): 12 days\n• Earned Leave (EL): 15 days\n• LOP Used: 0 days\n\nNext credit on July 1, 2024.`};
+  }
+  if (m.includes('payslip') || m.includes('salary') || m.includes('pay')) {
+    activateAgent('Finance Agent');
+    return {agent:'💰 Finance Agent', color:'amber', text:`💰 Payslip — Priya Sharma, May 2024\n\nGross: ₹95,000\n(-) PF (12%): ₹11,400\n(-) TDS: ₹9,500\n(-) ESI: ₹714\n\nNet Pay: ₹73,386\nCredited: May 31, 2024 to account **4521`};
+  }
+  if (m.includes('reimbursement') || m.includes('claim')) {
+    activateAgent('Finance Agent');
+    return {agent:'💰 Finance Agent', color:'amber', text:`💼 Reimbursement History — Priya Sharma\n\n1. Apr 2024 — Travel Delhi: ₹3,800 ✅\n2. Mar 2024 — Conference: ₹6,200 ✅\n3. Feb 2024 — Client Visit: ₹2,100 ✅\n\nTotal YTD: ₹12,100 / ₹50,000 limit\nPending: None`};
+  }
+  if (m.includes('maternity') || m.includes('policy') || m.includes('rule')) {
+    activateAgent('RAG Agent');
+    return {agent:'📚 RAG Agent', color:'purple', text:`📚 Maternity Leave Policy — Chennai Branch\nSource: HR_Policy_v4.2.pdf (Page 34)\n\n• Duration: 26 weeks paid leave\n• Eligibility: After 80 working days\n• Medical bonus: ₹3,500 (one-time)\n• WFH: 12 weeks post-return allowed\n• Applicable: All grades L1–L7`};
+  }
+  if (m.includes('interview') || m.includes('schedule')) {
+    activateAgent('Recruit Agent');
+    return {agent:'🎯 Recruit Agent', color:'teal', text:`🎯 Interview Scheduled!\n\nRole: Python Developer (L3)\nDate: Tomorrow 10:30 AM\nPanel: Arjun Mehta + Rajesh Kumar\n\n📨 Invites sent to 2 panelists\n📋 8 AI-generated questions ready\n🗂️ ATS updated — Interview Scheduled\n🔔 Reminder set 30 min before`};
+  }
+  if (m.includes('attrition') || m.includes('risk')) {
+    activateAgent('Attrition AI');
+    return {agent:'📉 Attrition AI', color:'', text:`📉 Current Attrition Risk Summary\n\n🚨 Critical (>75%): 2 employees\n⚠️ High (50–75%): 5 employees\n✅ Low (<50%): 38 employees\n\nTop risk: Pooja Iyer (82%) — recommend immediate HRBP intervention.`};
+  }
+  activateAgent('Orchestrator');
+  return {agent:'🤖 Orchestrator', color:'', text:`I've routed your request through all active agents.\n\nI can help with:\n📋 Leave applications & balances\n💰 Payslip & salary details\n📚 HR policy queries (RAG)\n🎯 Interview scheduling\n💼 Reimbursement claims\n📉 Attrition & burnout insights\n\nPlease be more specific!`};
+}
+
+function activateAgent(name) {
+  document.querySelectorAll('.agent-item').forEach(el => {
+    el.classList.remove('agent-active');
+    el.querySelector('.agent-status').textContent = 'Idle';
+  });
+  document.querySelectorAll('.agent-item').forEach(el => {
+    if (el.querySelector('.agent-name').textContent.includes(name.split(' ')[0])) {
+      el.classList.add('agent-active');
+      el.querySelector('.agent-status').textContent = 'Processing...';
+      setTimeout(() => { el.querySelector('.agent-status').textContent = 'Done ✓'; setTimeout(() => { el.querySelector('.agent-status').textContent = 'Idle'; }, 2000); }, 1500);
+    }
+  });
+}
+
+function sendChat() {
+  const inp = document.getElementById('chat-inp');
+  const msg = inp.value.trim();
+  if (!msg) return;
+  const msgs = document.getElementById('chat-msgs');
+  msgs.innerHTML += `<div class="msg user">${msg}</div>`;
+  msgs.innerHTML += `<div class="msg system" id="typing-indicator">⏳ AI agents processing...</div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+  inp.value = '';
+  setTimeout(() => {
+    const typing = document.getElementById('typing-indicator');
+    if (typing) typing.remove();
+    const resp = getAIResponse(msg);
+    msgs.innerHTML += `<div class="msg ai"><div class="agent-tag ${resp.color}">${resp.agent}</div>${resp.text.replace(/\n/g, '<br>')}</div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 1100);
+}
+
+function quickChat(msg) {
+  document.getElementById('chat-inp').value = msg;
+  sendChat();
+}
+
+/* ===================== VOICE AI ===================== */
+let voiceActive = false;
+const voiceResponses = {
+  'Apply sick leave for tomorrow':   '✅ Sick leave applied for tomorrow. SL balance: 11 days. Manager notified.',
+  'What is my leave balance?':       '📊 Casual: 8 | Sick: 12 | Earned: 15 days remaining.',
+  'When is my next salary?':         '💰 Next salary: June 30. Estimated net: ₹73,386 to account **4521.',
+  'Book a cab for office visit':     '🚗 Cab booked 9:00 AM tomorrow. ₹450 reimbursement approved.',
+  'Show my pending approvals':       '📋 Pending: Travel reimbursement ₹4,200 (Finance) + WFH Jun 15 (Manager).',
+};
+
+function simulateVoice(cmd) {
+  const vt = document.getElementById('voice-transcript');
+  const vr = document.getElementById('voice-response');
+  const vs = document.getElementById('voice-status');
+  vs.textContent = 'Processing speech...';
+  vt.style.color = 'var(--text2)'; vt.textContent = '';
+  vr.textContent = '';
+  let i = 0;
+  const typing = setInterval(() => {
+    vt.textContent = cmd.substring(0, i++) + (i <= cmd.length ? '|' : '');
+    if (i > cmd.length) {
+      clearInterval(typing);
+      vt.textContent = cmd;
+      vs.textContent = 'Intent detected — executing...';
+      setTimeout(() => {
+        vr.style.color = 'var(--green)';
+        vr.textContent = voiceResponses[cmd] || 'Command processed successfully.';
+        vs.textContent = 'Tap to speak';
+      }, 700);
+    }
+  }, 38);
+}
+
+function toggleVoice() {
+  const btn = document.getElementById('voice-btn');
+  voiceActive = !voiceActive;
+  btn.classList.toggle('listening', voiceActive);
+  document.getElementById('voice-status').textContent = voiceActive ? 'Listening...' : 'Tap to speak';
+  if (voiceActive) setTimeout(() => { voiceActive = false; btn.classList.remove('listening'); document.getElementById('voice-status').textContent = 'Tap to speak'; }, 3000);
+}
+
+/* ===================== BOOT ===================== */
+initDashboard();
+initLeave();
+
+/* Animate agent pills every 3 seconds */
+const allPills = ['pill-recruit','pill-leave','pill-payroll','pill-compliance','pill-notify'];
+setInterval(() => {
+  allPills.forEach(p => { document.getElementById(p).className = 'pill idle'; });
+  const active = allPills[Math.floor(Math.random() * allPills.length)];
+  document.getElementById(active).className = 'pill running';
+  setTimeout(() => { document.getElementById(active).className = 'pill idle'; }, 2000);
+}, 3000);
+
+</script>
+</body>
+</html>

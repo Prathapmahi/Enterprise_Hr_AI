@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+*.db
+*.db-shm
+*.db-wal
+data/faiss_index/
+logs/
+.DS_Store
+node_modules/
+venv/
+.venv/
+dist/
+build/
+*.log
+ollama_models/
